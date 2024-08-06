@@ -16,6 +16,9 @@ public:
 	CKolokvijum12019Doc* GetDocument() const;
 	DImage arm1, arm2, body1, leg1, leg2, pozadina;
 	float arm1Ang, arm2Ang, body1Ang, leg1Ang, leg2Ang;
+	float arm1Max, arm2Max, body1Max, leg1Max, leg2Max;
+	float arm1Min, arm2Min, body1Min, leg1Min, leg2Min;
+	float minAng, maxAng;
 // Operations
 public:
 

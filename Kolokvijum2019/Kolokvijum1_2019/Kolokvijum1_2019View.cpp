@@ -51,6 +51,8 @@ CKolokvijum12019View::CKolokvijum12019View() noexcept
 	leg1Ang = 0;
 	leg2Ang = 0;
 
+	minAng = 0;
+	maxAng = -90;
 }
 
 CKolokvijum12019View::~CKolokvijum12019View()
@@ -77,21 +79,31 @@ void CKolokvijum12019View::OnDraw(CDC* pDC)
 	CRect clientRect;
 	GetClientRect(clientRect);
 
-	int oldMode = pDC->SetGraphicsMode(GM_ADVANCED);
+	CDC memDC;
+	memDC.CreateCompatibleDC(pDC);
+	
+	CBitmap memBM;
+	memBM.CreateCompatibleBitmap(pDC, clientRect.Width(), clientRect.Height());
+	memDC.SelectObject(memBM);
+
+
+	int oldMode = memDC.SetGraphicsMode(GM_ADVANCED);
 	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
+	memDC.GetWorldTransform(&oldForm);
 
-	DrawBackground(pDC, clientRect);
+	DrawBackground(&memDC, clientRect);
 
 
-	Translate(pDC, 350, 350, false);
-	DrawBody1(pDC);
-	DrawArm1(pDC);
-	DrawArm2(pDC);
-	pDC->SetWorldTransform(&oldForm);
-	Translate(pDC, 138, 356, false);
-	DrawLeg1(pDC);
-	DrawLeg2(pDC);
+	Translate(&memDC, 350, 350, false);
+	DrawBody1(&memDC);
+	DrawArm1(&memDC);
+	DrawArm2(&memDC);
+	memDC.SetWorldTransform(&oldForm);
+	Translate(&memDC, 138, 356, false);
+	DrawLeg1(&memDC);
+	DrawLeg2(&memDC);
+	memDC.SetWorldTransform(&oldForm);
+	pDC->BitBlt(0, 0, clientRect.Width(), clientRect.Height(), &memDC, 0, 0, SRCCOPY);
 }
 
 void CKolokvijum12019View::DrawArm1(CDC* pDC) {
@@ -274,34 +286,68 @@ void CKolokvijum12019View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	
 	switch (nChar) {
 		case 'Q':
-			arm1Ang -= 10;
+			if(arm1Ang > 0)
+				arm1Ang -= 10;
 			break;
 		case 'A':
-			arm1Ang += 10;
+			if (arm1Ang < 90)
+				arm1Ang += 10;
 			break;
 		case 'T':
-			arm2Ang -= 10;
+			if (arm2Ang > maxAng)
+				arm2Ang -= 10;
 			break;
 		case 'G':
-			arm2Ang += 10;
+			if (arm2Ang < minAng)
+				arm2Ang += 10;
 			break;
 		case 'W':
-			body1Ang -= 10;
+			if (body1Ang > maxAng)
+				body1Ang -= 10;
 			break;
 		case 'S':
-			body1Ang += 10;
+			if (body1Ang < minAng)
+				body1Ang += 10;
 			break;
 		case 'E':
-			leg1Ang -= 10;
+			if (leg1Ang > maxAng)
+				leg1Ang -= 10;
 			break;
 		case 'D':
-			leg1Ang += 10;
+			if (leg1Ang < minAng)
+				leg1Ang += 10;
 			break;
 		case 'R':
-			leg2Ang -= 10;
+			if (leg2Ang > maxAng)
+				leg2Ang -= 10;
 			break;
 		case 'F':
-			leg2Ang += 10;
+			if (leg2Ang < minAng)
+				leg2Ang += 10;
+			break;
+		case VK_LEFT:
+			if (arm1Ang > maxAng)
+				arm1Ang -= 10;
+			if (arm2Ang > maxAng)
+				arm2Ang -= 10;
+			if (body1Ang > maxAng)
+				body1Ang -= 10;
+			if (leg1Ang > maxAng)
+				leg1Ang -= 10;
+			if (leg2Ang > maxAng)
+				leg2Ang -= 10;
+			break;
+		case VK_RIGHT:
+			if (arm1Ang < minAng)
+				arm1Ang += 10;
+			if (arm2Ang < minAng)
+				arm2Ang += 10;
+			if (body1Ang < minAng)
+				body1Ang += 10;
+			if (leg1Ang < minAng)
+				leg1Ang += 10;
+			if (leg2Ang < minAng)
+				leg2Ang += 10;
 			break;
 		default:
 			break;
