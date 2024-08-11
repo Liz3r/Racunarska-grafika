@@ -22,9 +22,9 @@ void CGLRenderer::CalculateCameraPos()
 	alfa = angAlfa * 3.141592 / 180;
 	beta = angBeta * 3.141592 / 180;
 
-	eyex = 10 * cos(alfa) * sin(beta);
-	eyey = 10 * sin(alfa);
-	eyez = 10 * cos(alfa) * cos(beta);
+	eyex = 25 * cos(alfa) * sin(beta);
+	eyey = 25 * sin(alfa);
+	eyez = 25 * cos(alfa) * cos(beta);
 }
 
 bool CGLRenderer::CreateGLContext(CDC* pDC)
@@ -88,14 +88,46 @@ void CGLRenderer::DrawScene(CDC *pDC)
 	glTranslatef(0, -20, 0);
 	DrawAxes();
 
-	glColor3f(1.0, 1.0,0.0);
-	//DrawSphere(1.0, 25, 0.25, 0.25, 0.24);
-	glRotatef(160, 1.0, 0.0, 0.0);
-	DrawCone(0.5, 5.0, 15, 0.75, 0.75, 0.24);
+	//telo
+	glColor3f(1.0, 1.0, 1.0);
+	glTranslatef(4.4,0.0,0.0);
+	DrawSphere(3.0, 25, 0.25, 0.25, 0.24);
+	glTranslatef(-4.4, 0.0, 0.0);
+	DrawSphere(1.5, 25, 0.25, 0.25, 0.24);
+	glTranslatef(-2.4, 0.0, 0.0);
+	DrawSphere(1.0, 25, 0.75, 0.25, 0.24);
+	glTranslatef(2.4, 0.0, 0.0);
+	//noge
+	DrawLeg(-90);
+	DrawLeg(-115);
+	DrawLeg(-140);
+	DrawLeg(-165);
+
+	DrawLeg(5);
+	DrawLeg(30);
+	DrawLeg(55);
+	DrawLeg(80);
 	//---------------------------------
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
 }
+void CGLRenderer::DrawLeg(int alfa)
+{
+	glPushMatrix();
+	{
+		glRotatef(alfa, 0.0, 1.0, 0.0);
+		glRotatef(-25, 1.0, 0.0, 0.0);
+		glRotatef(-25, 0.0, 0.0, 1.0);
+		glTranslatef(0.0, 3.0, 0.0);
+		DrawCone(0.3, 3.0, 10, 0.75, 0.75, 0.24);
+		glTranslatef(0.0, 1.5, 0.0);
+		glRotatef(-105, 1.0, 0.0, 1.0);
+		glTranslatef(0.0, 4.15, 0.0);
+		DrawCone(0.6, 8.0, 10, 0.75, 0.75, 0.24);
+	}
+	glPopMatrix();
+}
+
 
 void CGLRenderer::DrawCone(double r, double h, int nSeg, double texU, double texV, double texR)
 {
@@ -107,6 +139,21 @@ void CGLRenderer::DrawCone(double r, double h, int nSeg, double texU, double tex
 	{
 		for (int i = 0; i < nSeg; i++) {
 			glTexCoord2f(texU + texR*sin(ang), texV + texR * cos(ang));
+			glVertex3f(r * sin(ang), -h / 2, r * cos(ang));
+			glTexCoord2f(texU + texR * sin(ang + stepAng), texV + texR * cos(ang + stepAng));
+			glVertex3f(r * sin(ang + stepAng), -h / 2, r * cos(ang + stepAng));
+			glTexCoord2f(texU, texV);
+			glVertex3f(0.0, h / 2, 0.0);
+
+			ang += stepAng;
+		}
+	}
+	glEnd();
+	ang = 0;
+	glBegin(GL_POLYGON);
+	{
+		for (int i = 0; i < nSeg; i++) {
+			glTexCoord2f(texU + texR * sin(ang), texV + texR * cos(ang));
 			glVertex3f(r * sin(ang), -h / 2, r * cos(ang));
 			glTexCoord2f(texU + texR * sin(ang + stepAng), texV + texR * cos(ang + stepAng));
 			glVertex3f(r * sin(ang + stepAng), -h / 2, r * cos(ang + stepAng));

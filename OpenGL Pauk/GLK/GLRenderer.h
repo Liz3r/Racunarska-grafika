@@ -18,6 +18,7 @@ public:
 	void DestroyScene(CDC* pDC);			// dealocira resurse alocirane u drugim funkcijama ove klase,
 	void DrawSphere(double r, int nSeg, double texU, double texV, double texR);
 	void DrawCone(double r, double h, int nSeg, double texU, double texV, double texR);
+	void DrawLeg(int alfa);
 
 	int angAlfa, angBeta;
 	int eyex, eyey, eyez;
