@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CAutoView, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_WM_KEYDOWN()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // CAutoView construction/destruction
@@ -64,17 +65,35 @@ void CAutoView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
-	pDC->SetGraphicsMode(GM_ADVANCED);
+	//pDC->SetGraphicsMode(GM_ADVANCED);
 	
 	GetClientRect(&c);
 
-	DrawGround(pDC, groundAngle);
+	CDC memDC;
+	memDC.CreateCompatibleDC(pDC);
+	CBitmap bm;
+	bm.CreateCompatibleBitmap(pDC, c.Width(), c.Height());
 
-	Translate(pDC, autoX*cos(-RAD(groundAngle)), c.Height() - 147 + autoX *sin(-RAD(groundAngle)), false);
-	Rotate(pDC, -groundAngle, false);
-	DrawCar(pDC, 0, 0, 350, 125);
-	DrawWheel(pDC, 13, 80, poluprecnikTocka, wheelAng);
-	DrawWheel(pDC, 240, 80, poluprecnikTocka, wheelAng);
+	memDC.SelectObject(&bm);
+	int oldMode = memDC.SetGraphicsMode(GM_ADVANCED);
+	
+	XFORM oldF;
+	memDC.GetWorldTransform(&oldF);
+	{
+		CBrush bb(RGB(255, 255, 255));
+		memDC.FillRect(CRect(0, 0, c.Width(), c.Height()), &bb);
+
+		DrawGround(&memDC, groundAngle);
+
+		Translate(&memDC, autoX * cos(-RAD(groundAngle)), c.Height() - 147 + autoX * sin(-RAD(groundAngle)), false);
+		Rotate(&memDC, -groundAngle, false);
+		DrawCar(&memDC, 0, 0, 350, 125);
+		DrawWheel(&memDC, 13, 80, poluprecnikTocka, wheelAng);
+		DrawWheel(&memDC, 240, 80, poluprecnikTocka, wheelAng);
+	}
+	memDC.SetWorldTransform(&oldF);
+	memDC.SetGraphicsMode(oldMode);
+	pDC->BitBlt(0, 0, c.Width(), c.Height(), &memDC, 0, 0, SRCCOPY);
 }
 
 void CAutoView::DrawWheel(CDC* pDC, int x, int y, int r, float angle) {
@@ -252,4 +271,12 @@ void CAutoView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	Invalidate();
 
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+BOOL CAutoView::OnEraseBkgnd(CDC* pDC)
+{
+	return true;
+
+	return CView::OnEraseBkgnd(pDC);
 }
